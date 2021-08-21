@@ -7,6 +7,18 @@ app.use(express.json());
 // BD fake
 const customers = [];
 
+// Middleware
+function verifyIfExistsAccountCPF(request, response, next){
+    const {cpf} = request.headers;
+    const customer = customers.find(c => c.cpf === cpf);
+    if(!customer) return response.status(404).json({error: "Cliente não encontrado"});
+
+    // repassando o cliente
+    request.customer = customer;
+
+    return next();
+}
+
 app.post("/account", (request, response) => {
     const { cpf, name } = request.body;
 
@@ -24,13 +36,9 @@ app.post("/account", (request, response) => {
 });
 
 // recuperar extrato bancário
-app.get("/statement", (request, response) => {
-    const {cpf} = request.headers;
-
-    const customer = customers.find(c => c.cpf === cpf);
-
-    if(!customer) return response.status(404).json({error: "Cliente não encontrado"})
-
+app.get("/statement", verifyIfExistsAccountCPF, (request, response) => {
+    // recupera o customer passado pelo middleware
+    const { customer } = request;
     return response.json(customer.statement);
 });
 
