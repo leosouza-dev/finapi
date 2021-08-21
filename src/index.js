@@ -44,6 +44,11 @@ app.post("/account", (request, response) => {
     return response.status(201).send();
 });
 
+app.get("/account", verifyIfExistsAccountCPF, (request, response) => {
+    const { customer } = request;
+    return response.status(200).json(customer)
+});
+
 app.put("/account", verifyIfExistsAccountCPF, (request, response) => {
     const { name } = request.body;
     const { customer } = request;
@@ -53,9 +58,11 @@ app.put("/account", verifyIfExistsAccountCPF, (request, response) => {
     return response.status(201).send();
 });
 
-app.get("/account", verifyIfExistsAccountCPF, (request, response) => {
+app.delete("/account", verifyIfExistsAccountCPF, (request, response) => {
     const { customer } = request;
-    return response.status(200).json(customer)
+    customers.splice(customer, 1);
+
+    return response.status(200).send(customers);
 });
 
 // recuperar extrato bancário
